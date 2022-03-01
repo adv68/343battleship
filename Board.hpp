@@ -33,6 +33,10 @@ class Board {
 	private:
 		int* grid;
 		bool visible;
+
+		// added for custom board
+		static const int widthOffset = 1;
+		static const int heightOffset = 'A';
 	
 	friend std::ostream& operator<<(std::ostream& os, Board const& b);
 

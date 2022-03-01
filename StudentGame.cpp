@@ -15,6 +15,11 @@ Game::Game(){
  * Begin Game let's user and then computer setup boards then calls run()
  */
 void Game::beginGame(){
+	player = Board();
+
+	std::cout << player << std::endl;
+
+	std::cout << player[2][2] << std::endl;
 }
 
 /**
