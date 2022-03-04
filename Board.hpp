@@ -7,6 +7,9 @@
 #define HEIGHT 10
 #define WIDTH 10
 
+#define HEIGHT_OFFSET 'A'
+#define WIDTH_OFFSET 1
+
 class Board {
 
 	public:
@@ -33,12 +36,8 @@ class Board {
 	private:
 		int* grid;
 		bool visible;
-
-		// added for custom board
-		static const int widthOffset = 1;
-		static const int heightOffset = 'A';
 	
-	friend std::ostream& operator<<(std::ostream& os, Board const& b);
+	friend std::ostream& operator<<(std::ostream& os, Board& b);
 
 };
 
