@@ -149,7 +149,38 @@ bool Game::place(const int& x, const int& y, Direction d, const Ship& s, Board& 
  * Call human turn/computer turn until someone wins.
  */
 void Game::run(){
-	
+	int humanHits = 0;
+	int cpuHits = 0;
+	//17 is the total number of ship spaces
+	while(humanHits != 17 || cpuHits != 17){
+		//call player turn
+		humanTurn();
+		//check for player win
+		for(int i=0;i<=HEIGHT;i++){
+			for(int j=0;j<=WIDTH;j++){
+				if(player[i][j]==HIT){
+					humanHits++;
+				}
+			}
+		}
+		if(humanHits==17){
+			std::cout << "Player won" << std::endl;
+		}
+		
+		//call cpu turn
+		computerTurn();
+		//check for cpu win
+		for(int i=0;i<=HEIGHT;i++){
+			for(int j=0;j<=WIDTH;j++){
+				if(computer[i][j]==HIT){
+					cpuHits++;
+				}
+			}
+		}
+		if(cpuHits==17){
+			std::cout << "Computer won" << std::endl;
+		}
+	}
 }
 
 void Game::humanTurn(){
