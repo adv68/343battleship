@@ -5,6 +5,9 @@
 #include <iostream>
 #include <random>
 
+Board playerShots = Board();
+Board computerShots = Board();
+
 /**
  * Constructor will create the ships vector and add ships to it.
  */
@@ -45,7 +48,7 @@ void Game::placeShips(){
 	// iterate through all ships to place them
 	for (std::vector<Ship>::iterator iterator = ships.begin(); iterator != ships.end(); ++iterator) {
 		// print the current board status
-		std::cout << player << std::endl;
+		std::cout << Game::player << std::endl;
 
 		// get the current ship in the iterator
 		Ship ship = *iterator;
@@ -154,12 +157,12 @@ void Game::run(){
 	//17 is the total number of ship spaces
 	while(humanHits != 17 || cpuHits != 17){
 		//call player turn
-		humanTurn();
+		Game::humanTurn();
 		//check for player win
 		humanHits = 0;
 		for(int i=0;i<=HEIGHT;i++){
 			for(int j=0;j<=WIDTH;j++){
-				if(player[i][j]==HIT){
+				if(Game::player[i][j]==HIT){
 					humanHits++;
 				}
 			}
@@ -169,12 +172,12 @@ void Game::run(){
 		}
 		
 		//call cpu turn
-		computerTurn();
+		Game::computerTurn();
 		//check for cpu win
 		cpuHits = 0;
 		for(int i=0;i<=HEIGHT;i++){
 			for(int j=0;j<=WIDTH;j++){
-				if(computer[i][j]==HIT){
+				if(Game::computer[i][j]==HIT){
 					cpuHits++;
 				}
 			}
@@ -189,7 +192,9 @@ void Game::humanTurn(){
 	char row;
 	int col;
 
-	std::cout << Game::player << std::endl;
+	//std::cout << Game::player << std::endl;
+	//show previous shots
+	std::cout << "Previous shots: " << std::endl << playerShots << std::endl;
 
 	while (true) {
 		std::cout << "Enter coordinate to attack:" << std::endl;
@@ -206,9 +211,17 @@ void Game::humanTurn(){
 	}
 
 	std::cout << "Pos: " << row << col << std::endl;
+	playerShots[row][col] = MISS;
+	std::cout << "New shots: " << std::endl << playerShots << std::endl;
 }
 
 void Game::computerTurn(){
+	std::cout << "CPU taking turn..." << std::endl;
+	std::cout << "Your current board: " <<std::endl;
+	std::cout << Game::player << std::endl;
+	std::cout << "CPU taking turn..." << std::endl;
+	std::cout << "Your board after CPU turn: " <<std::endl;
+	std::cout << Game::player << std::endl;
 }
 
 /**
@@ -218,7 +231,7 @@ int main(int argc, char** argv){
 	(void)argc;
 	(void)argv;
 	Game g;
-
+	
 	g.beginGame();
 
 	return 0;
