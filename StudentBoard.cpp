@@ -16,8 +16,8 @@ Board::Board(const Board& other){
 }
 
 Board& Board::operator=(const Board& other){
-    
-}
+    return *this;
+    }
 
 Board::~Board(){
     delete(grid);
