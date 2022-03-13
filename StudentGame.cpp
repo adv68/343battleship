@@ -7,10 +7,6 @@
 //http://coliru.stacked-crooked.com/a/c5b94870fdcd13f2
 //random number generator reference code
 
-//summon some boards to record the shots taken
-Board playerShots = Board();
-Board computerShots = Board();
-
 /**
  * Constructor will create the ships vector and add ships to it.
  */
@@ -24,13 +20,18 @@ Game::Game(){
 }
 
 /**
- * Begin Game let's user and then computer setup boards then calls run()
+ * Begin Game lets user and then computer setup boards then calls run()
  */
 void Game::beginGame(){
 	//welcome player to the game and set up ship boards
-	std::cout << "Welcome to Battleship!" << std::endl << std::endl;
+	std::cout << std::endl << "Welcome to Battleship!" << std::endl << std::endl;
+	std::cout << "Board coordinates are in the form RowCol - A1, B4, etc." << std::endl << std::endl;
 	player = Board();
 	computer = Board();
+
+	// define board visibility
+	player.setVisible(true);
+	computer.setVisible(false);
 
 	//place the ships
 	std::cout << "It's time to position your fleet..." << std::endl;
@@ -52,6 +53,7 @@ void Game::placeShips(){
 	// declare variables
 	char orientation, row;
 	int col;
+	bool validOrientation, validRow, validCol;
 
 	// iterate through all ships to place them
 	for (std::vector<Ship>::iterator iterator = ships.begin(); iterator != ships.end(); ++iterator) {
@@ -78,25 +80,60 @@ void Game::placeShips(){
 			std::cin >> col;
 			std::cin.ignore();
 
-			// check if orientation and coords are valid ship placement
-			if (place(col, row, orientation == 'H' ? HORIZONTAL : VERTICAL, ship, player)) {
-				// loop through spaces of ship
-				for (int i = 0; i < ship.getSpaces(); ++i) {
-					// if the orientation is horizontal
-					if (orientation == 'H') {
-						// place ship char on board
-						player[row][col + i] = ship.getChr();
-					// if the orientation is vertical
-					} else {
-						// place ship char on board
-						player[row + i][col] = ship.getChr();
-					}
-				}
+			// reset validity testers
+			validOrientation = false;
+			validRow = false;
+			validCol = false;
 
-				// since input is valid, break from while loop to continue to next ship
-				break;
+			// validate input
+			// validate orientation
+			if (orientation == 'H' || orientation == 'V') {
+				validOrientation = true;
 			} else {
-				std::cout << "Invalid placement. Try again." << std::endl;
+				// if invalid orientation, tell the user
+				std::cout << "Invalid Ship Orientation. Allowable values are 'H' and 'V'." << std::endl;
+			}
+
+			// validate row
+			if (row >= HEIGHT_OFFSET && row < HEIGHT_OFFSET + HEIGHT) {
+				validRow = true;
+			} else {
+				// if invalid row, tell the user
+				std::cout << "Error: Row specified is not on the board. Allowable rows are " << (char)HEIGHT_OFFSET 
+					<< " - " << (char)(HEIGHT_OFFSET + HEIGHT - 1) << std::endl;
+			}
+
+			// validate col
+			if (col >= WIDTH_OFFSET && col < WIDTH_OFFSET + WIDTH) {
+				validCol = true;
+			} else {
+				// if invalid col, tell the user
+				std::cout << "Error: Column specified is not on the board. Allowable cols are " << WIDTH_OFFSET
+					<< " - " << (WIDTH_OFFSET + WIDTH - 1) << std::endl;
+			}
+
+			// if input location is a valid input, try ship placement
+			if (validOrientation && validRow && validCol) {
+				// check if orientation and coords are valid ship placement
+				if (place(col, row, orientation == 'H' ? HORIZONTAL : VERTICAL, ship, player)) {
+					// loop through spaces of ship
+					for (int i = 0; i < ship.getSpaces(); ++i) {
+						// if the orientation is horizontal
+						if (orientation == 'H') {
+							// place ship char on board
+							player[row][col + i] = ship.getChr();
+						// if the orientation is vertical
+						} else {
+							// place ship char on board
+							player[row + i][col] = ship.getChr();
+						}
+					}
+
+					// since input is valid, break from while loop to continue to next ship
+					break;
+				} else {
+					std::cout << "Invalid ship location. Try again." << std::endl;
+				}
 			}
 		}
 	}
@@ -109,99 +146,51 @@ void Game::placeShips(){
 /**
  * Handle the computer placing ships.
  */
-void Game::placeShipsPC(){
-	//random number stuff
-	const int range_from  = 0;
-    	const int range_to    = 10;
-    	std::random_device                  rand_dev;
-    	std::mt19937                        generator(rand_dev());
-    	std::uniform_int_distribution<int>  distr(range_from, range_to);
+void Game::placeShipsPC() {
+	std::random_device randDev;
+	std::mt19937 generator{randDev()};
+	std::uniform_int_distribution<int> distrOrient(0, 1);
+	std::uniform_int_distribution<int> distrRow(HEIGHT_OFFSET, HEIGHT_OFFSET + HEIGHT - 1);
+	std::uniform_int_distribution<int> distrCol(WIDTH_OFFSET, WIDTH_OFFSET + WIDTH - 1);
   
-	std::cout << "Placing CPU ships..." << std::endl;
 	// iterate through all ships to place them
 	for (std::vector<Ship>::iterator iterator = ships.begin(); iterator != ships.end(); ++iterator) {
-		// commented out because we don't want player's to see enemy ships
-		// print the current board status
-		// std::cout << Game::computer << std::endl;
-
 		// get the current ship in the iterator
 		Ship ship = *iterator;
 
 		// loop until valid input
 		while (true) {
-			//setting up orientation, row, and col for place() function
+			// get random orientation, row, and col
 			char orientation;
-			//get a random number and change it to a letter for row
-			int rowInt = distr(generator);
-			char rowChar = 'Z';
-			if(rowInt == 1){
-				rowChar = 'A';
-			}
-			if(rowInt == 2){
-				rowChar = 'B';
-			}
-			if(rowInt == 3){
-				rowChar = 'C';
-			}
-			if(rowInt == 4){
-				rowChar = 'D';
-			}
-			if(rowInt == 5){
-				rowChar = 'E';
-			}
-			if(rowInt == 6){
-				rowChar = 'F';
-			}
-			if(rowInt == 7){
-				rowChar = 'G';
-			}
-			if(rowInt == 8){
-				rowChar = 'H';
-			}
-			if(rowInt == 9){
-				rowChar = 'I';
-			}
-			if(rowInt == 10){
-				rowChar = 'J';
-			}
-			//get a random column
-			int col = distr(generator);
-			//turn a random number into the orientation selector
-			if(distr(generator)%2==1){
+			char row = (char)distrRow(generator);
+			int col = distrCol(generator);
+			if (distrOrient(generator) == 0) {
 				orientation = 'H';
-			}
-			else{
+			} else {
 				orientation = 'V';
 			}
 			
 			// check if orientation and coords are valid ship placement
-			if (place(col, rowChar, orientation == 'H' ? HORIZONTAL : VERTICAL, ship, computer)) {
+			// ignore else for computer - we don't want visible feedback in this scenario
+			if (place(col, row, orientation == 'H' ? HORIZONTAL : VERTICAL, ship, computer)) {
 				// loop through spaces of ship
 				for (int i = 0; i < ship.getSpaces(); ++i) {
 					// if the orientation is horizontal
 					if (orientation == 'H') {
 						// place ship char on board
-						computer[rowChar][col + i] = ship.getChr();
+						computer[row][col + i] = ship.getChr();
 					// if the orientation is vertical
 					} else {
 						// place ship char on board
-						computer[rowChar + i][col] = ship.getChr();
+						computer[row + i][col] = ship.getChr();
 					}
 				}
 
 				// since input is valid, break from while loop to continue to next ship
 				break;
-			} else {
-				//commented out because player doesn't need to know about cpu ship placement
-				//std::cout << "Invalid cpu placement. Try again." << std::endl;
-			}
+			} 
 		}
 	}
-	
-	std::cout << "CPU ships placed" << std::endl << std::endl;
-	// commented out because we don't want player's to see enemy ships
-	// print the current board status
-	//std::cout << Game::computer << std::endl;
 }
 
 /**
@@ -255,22 +244,35 @@ bool Game::place(const int& x, const int& y, Direction d, const Ship& s, Board& 
  */
 void Game::run(){
 	//variables to count how many hits were made
-	int humanHits;
-	int cpuHits;
+	int humanHits = 0;
+	int cpuHits = 0;
+
+	// print beginning
+	std::cout << "Beginning Game." << std::endl;
+
 	//17 is the total number of ship spaces, if there are 17 hits for cpu or player, game over
-	while(humanHits != 17 && cpuHits != 17){
+	while(player.count() < 17 && computer.count() < 17) {
+		// print boards and score
+		std::cout << std::endl << "Player Board" << std::endl;
+		std::cout << player << std::endl;
+		std::cout << "Computer Board" << std::endl;
+		std::cout << computer << std::endl;
+
 		//call player turn
 		Game::humanTurn();
+
 		//check for player win by counting hits
 		humanHits = 0;
 		for (int i = HEIGHT_OFFSET; i < HEIGHT_OFFSET + HEIGHT; i++) {
-        		for (int j = WIDTH_OFFSET; j < WIDTH_OFFSET + WIDTH; j++) {
-				if(playerShots[i][j]==HIT){
+        	for (int j = WIDTH_OFFSET; j < WIDTH_OFFSET + WIDTH; j++) {
+				if(computer[i][j] == HIT){
 					humanHits++;
 				}
 			}
 		}
-		if(humanHits==17){
+		
+		// if human hits is 17 (or more) then the player won
+		if(humanHits >= 17){
 			std::cout << "Player won :)" << std::endl;
 			break;
 		}
@@ -281,42 +283,63 @@ void Game::run(){
 		//check for cpu win by counting hits
 		cpuHits = 0;
 		for (int i = HEIGHT_OFFSET; i < HEIGHT_OFFSET + HEIGHT; i++) {
-        		for (int j = WIDTH_OFFSET; j < WIDTH_OFFSET + WIDTH; j++) {
-				if(Game::player[i][j]==HIT){
+        	for (int j = WIDTH_OFFSET; j < WIDTH_OFFSET + WIDTH; j++) {
+				if(player[i][j] == HIT){
 					cpuHits++;
 				}
 			}
 		}
-		if(cpuHits==17){
+		
+		// if cpuHits is 17 (or more) then the computer won
+		if(cpuHits >= 17){
 			std::cout << "Computer won :(" << std::endl;
 			break;
+		}
+
+		// print out the current score
+		if (cpuHits > humanHits) {
+			std::cout << "COMPUTER is winning " << cpuHits << " to " << humanHits << "." << std::endl;
+		} else if (cpuHits < humanHits) {
+			std::cout << "PLAYER is winning " << humanHits << " to " << cpuHits << "." << std::endl;
+		} else {
+			std::cout << "Game is TIED at " << cpuHits << "." << std::endl;
 		}
 	}
 }
 
-void Game::humanTurn(){
+/**
+ * Runs one human turn
+ * 
+ * This function will ask for user input, validate said input, and will not
+ * return until a valid move has been made
+ */
+void Game::humanTurn() {
+	// define vars for the shot
 	char row;
 	int col;
-
-	//show previous shots
-	std::cout << "Player's turn" << std::endl;
-	std::cout << "Previous shot board: " << std::endl << playerShots << std::endl;
-
 	bool playerShotValid = false;
+
+	// print out info
+	std::cout << "Player's turn" << std::endl;
 
 	//ask player for a spot to hit until a valid coordinate is received
 	while (playerShotValid == false) {
+		// ask for coord
 		std::cout << "Enter coordinate to attack:" << std::endl;
 
+		// read coord from stdin and ignore the rest
 		std::cin >> row;
 		std::cin >> col;
 		std::cin.ignore();
 
+		// make sure coordinate is on board
 		if (row >= 'A' && row <= 'J' && col >= 1 && col <= 10) {
 		} else {
 			std::cout << "Invalid Coordinate!" << std::endl;
 		}
-		if(playerShots[row][col]!=MISS && playerShots[row][col]!=HIT){
+
+		// see if shot has already been taken
+		if (Game::computer[row][col] != MISS && Game::computer[row][col] != HIT) {
 			playerShotValid = true;
 		}
 		else{
@@ -326,89 +349,53 @@ void Game::humanTurn(){
 
 	//update the shot board according to whether or not an enemy ship was at the position of the shot taken
 	std::cout << std::endl << "Player taking shot at Pos: " << row << col << "!" << std::endl;
-	if(Game::computer[row][col] == 0){
-		playerShots[row][col] = MISS;
+	if(Game::computer[row][col] == EMPTY){
+		Game::computer[row][col] = MISS;
+		std::cout << "Player: Shot was a MISS." << std::endl;
 	}
 	else{
-		playerShots[row][col] = HIT;
+		Game::computer[row][col] = HIT;
+		std::cout << "Player: Shot was a HIT." << std::endl;
 	}
-	
-	//show the updated shot board
-	std::cout << "Updated shot board: " << std::endl;
-	std::cout << playerShots << std::endl;
 }
 
-void Game::computerTurn(){
-	//print statements declaring cpu turn, etc.
-	std::cout << "CPU's turn" << std::endl;
-	std::cout << "Your current board: " <<std::endl;
-	std::cout << Game::player << std::endl;
-	std::cout << "CPU taking shot..." << std::endl;
-	
+/**
+ * Runs one computer turn
+ * 
+ * This function will generate random shots, validate the shots, and will not
+ * return until a valid move has been made
+ */
+void Game::computerTurn() {	
 	//random number stuff
-	const int range_from  = 1;
-    	const int range_to    = 10;
-    	std::random_device                  rand_dev;
-    	std::mt19937                        generator(rand_dev());
-    	std::uniform_int_distribution<int>  distr(range_from, range_to);
+	std::random_device randDev;
+	std::mt19937 generator{randDev()};
+	std::uniform_int_distribution<int> distrRow(HEIGHT_OFFSET, HEIGHT_OFFSET + HEIGHT - 1);
+	std::uniform_int_distribution<int> distrCol(WIDTH_OFFSET, WIDTH_OFFSET + WIDTH - 1);
     	
-    	//set shot taken to false until successful shot
+    //set shot taken to false until successful shot
 	bool cpuShotTaken = false;
-	while (cpuShotTaken == false){
-		//get a random number and change it to a letter for row
-        	int rowInt = distr(generator);
-        	char rowChar = 'Z';
-        	if(rowInt == 1){
-        		rowChar = 'A';
-        	}
-        	if(rowInt == 2){
-        		rowChar = 'B';
-        	}
-        	if(rowInt == 3){
-        		rowChar = 'C';
-        	}
-        	if(rowInt == 4){
-        		rowChar = 'D';
-        	}
-        	if(rowInt == 5){
-        		rowChar = 'E';
-        	}
-        	if(rowInt == 6){
-        		rowChar = 'F';
-        	}
-        	if(rowInt == 7){
-        		rowChar = 'G';
-        	}
-        	if(rowInt == 8){
-        		rowChar = 'H';
-        	}
-        	if(rowInt == 9){
-        		rowChar = 'I';
-        	}
-        	if(rowInt == 10){
-        		rowChar = 'J';
-        	}
-        	//get a random column
-        	int col = distr(generator);
-        	//check if the shot was taken already, if so go back and get new randoms
-        	if(computerShots[rowChar][col] != MISS){
-        		//since computerShots only logs shots taken, we can set all shots to MISS
-        		computerShots[rowChar][col] = MISS;
-        		cpuShotTaken = true;
 
-        		//checking the player board for a hit compared to cpu shot board
-        		if(Game::player[rowChar][col] != 0){
-        			Game::player[rowChar][col] = HIT;
-        		}
-        		else{
-        			Game::player[rowChar][col] = MISS;
-        		}
-        	}
-        }
-	
-	//show player their new board
-	std::cout << "Your board after CPU turn: " <<std::endl;
-	std::cout << Game::player << std::endl;
+	while (cpuShotTaken == false){
+		// generate random coordinate for shot
+		char row = (char)distrRow(generator);
+		int col = distrCol(generator);
+
+		//check if the shot was taken already, if so go back and get new randoms
+		if (Game::player[row][col] != MISS && Game::player[row][col] != HIT) {
+			//since computerShots only logs shots taken, we can set all shots to MISS
+			cpuShotTaken = true;
+
+			//checking the player board for a hit compared to cpu shot board
+			if(Game::player[row][col] != EMPTY){
+				Game::player[row][col] = HIT;
+				std::cout << "Computer: Shot was a HIT." << std::endl;
+			}
+			else{
+				Game::player[row][col] = MISS;
+				std::cout << "Computer: Shot was a MISS." << std::endl;
+			}
+		}
+	}
 }
 
 /**
@@ -418,7 +405,7 @@ int main(int argc, char** argv){
 	(void)argc;
 	(void)argv;
 	Game g;
-	
+
 	g.beginGame();
 
 	return 0;
