@@ -4,17 +4,43 @@
 #include <algorithm>
 #include <iostream>
 
+/**
+ * Construct a new Board:: Board object
+ */
 Board::Board(){
+    // create new grid and fill it with empties
     grid = new int[WIDTH * HEIGHT];
-
     std::fill(grid, grid + (WIDTH * HEIGHT), EMPTY);
 }
 
+/**
+ * Construct a new Board:: Board object
+ * 
+ * Copy the values from board other
+ */
 Board::Board(const Board& other){
-    this->visible = other.visible;
+    // create new grid and copy other's grid into it
+    grid = new int[WIDTH * HEIGHT];
+    std::copy(other.grid, other.grid + (WIDTH * HEIGHT), grid);
+
+    // copy other's visible property
+    visible = other.visible;
 }
 
+
 Board& Board::operator=(const Board& other){
+    // create new grid in memory and copy vals into it
+    int* temp = new int[WIDTH * HEIGHT];
+    std::copy(other.grid, other.grid + (WIDTH * HEIGHT), temp);
+
+    // delete the grid reference and replace it with the new grid
+    delete grid;
+    grid = temp;
+
+    // copy other's visible property
+    visible = other.visible;
+
+    // return the board reference
     return *this;
 }
 

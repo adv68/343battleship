@@ -334,16 +334,15 @@ void Game::humanTurn() {
 
 		// make sure coordinate is on board
 		if (row >= 'A' && row <= 'J' && col >= 1 && col <= 10) {
+			// see if shot has already been taken
+			if (Game::computer[row][col] != MISS && Game::computer[row][col] != HIT) {
+				playerShotValid = true;
+			}
+			else{
+				std::cout << "Coordinate already attacked! Try a different one" << std::endl;
+			}
 		} else {
 			std::cout << "Invalid Coordinate!" << std::endl;
-		}
-
-		// see if shot has already been taken
-		if (Game::computer[row][col] != MISS && Game::computer[row][col] != HIT) {
-			playerShotValid = true;
-		}
-		else{
-			std::cout << "Coordinate already attacked! Try a different one" << std::endl;
 		}
 	}
 
